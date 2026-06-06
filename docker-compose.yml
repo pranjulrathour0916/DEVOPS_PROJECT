@@ -1,0 +1,49 @@
+services:
+ db:
+  image: postgres:15
+  container_name: db
+  restart: always
+  environment:
+    POSTGRES_USER: postgres
+    POSTGRES_PASSWORD: 9838
+    POSTGRES_DB: mydb
+  volumes:
+   - postgres_data:/var/lib/postgresql/data
+   - /Users/pranjulrathour/container/myMartPsql/myMartDatabse.sql:/docker-entrypoint-initdb.d/dump.sql
+  networks:
+   - mynetwork
+  ports:
+   - "5433:5432"
+
+ react:
+  build:
+   context: ./My-Mart
+   dockerfile: dockerfile
+  pull_policy: never
+  container_name: frontend
+  restart: always
+  depends_on:
+   - db
+  networks:
+   - mynetwork
+  ports:
+   - "3000:80"
+
+ node:
+  build:
+      context: ./martdb
+      dockerfile: dockerfile
+  pull_policy: never
+  container_name: backend
+  restart: always
+  depends_on:
+   - db
+  networks:
+   - mynetwork
+  ports:
+   - "5001:5001"
+
+volumes:
+ postgres_data:
+networks:
+ mynetwork:
