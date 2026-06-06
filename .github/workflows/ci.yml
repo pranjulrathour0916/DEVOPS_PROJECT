@@ -1,0 +1,44 @@
+name: Deploy My Mart
+
+on:
+ push:
+  branches: ["main"]
+
+permissions:
+ pages: write
+ id-token: write
+
+jobs:
+ build:
+  runs-on: ubuntu-latest
+
+  steps:
+   - name: Checkout Code
+     uses: actions/checkout@v4
+     
+   - name: docker login
+     run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
+    
+   - name: Build My_Mart Docker Images
+     run: docker build -t ${{ secrets.DOCKER_USERNAME }}/frontend -f ./My-Mart/dockerfile ./My-Mart
+
+   - name: Build My_Mart_DB Docker Image
+     run: docker build -t ${{ secrets.DOCKER_USERNAME }}/backend -f ./martdb/dockerfile ./martdb
+  
+   - name: Pushing Image to docker hub
+     run: |
+           docker push ${{ secrets.DOCKER_USERNAME }}/frontend
+           docker push ${{ secrets.DOCKER_USERNAME }}/backend
+   - name: Deploying Frontend on K8s
+     run: helm install frontned ./frontend --create-namespace app
+
+   - name: Deploying Backend on K8s
+     run: helm install frontned ./backend -n app
+
+ success-message: 
+    needs: [build]
+    runs-on: ubuntu-latest
+    if: success()
+    steps:
+    - run: echo "All jobs passed"
+    
