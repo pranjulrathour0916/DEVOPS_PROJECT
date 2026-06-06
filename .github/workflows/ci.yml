@@ -30,7 +30,7 @@ jobs:
            docker push ${{ secrets.DOCKER_USERNAME }}/frontend
            docker push ${{ secrets.DOCKER_USERNAME }}/backend
    - name: Deploying Frontend on K8s
-     run: helm install frontned ./frontend --create-namespace app
+     run: helm install frontend ./frontend --namespace app --create-namespace
 
    - name: Deploying Backend on K8s
      run: helm install frontned ./backend -n app
