@@ -30,6 +30,9 @@ jobs:
            docker push ${{ secrets.DOCKER_USERNAME }}/frontend
            docker push ${{ secrets.DOCKER_USERNAME }}/backend
 
+   - name: Create k8s Kind Cluster
+     uses: helm/kind-action@v1.10.0
+
    - name: Deploying Frontend on K8s
      run: helm install frontend ./frontend --namespace app --create-namespace
      working-directory: ./k8s
