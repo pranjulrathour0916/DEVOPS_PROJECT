@@ -1,0 +1,24 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+.perspective-1000 {
+  perspective: 1000px;
+}
+
+.transform-style-preserve-3d {
+  transform-style: preserve-3d;
+}
+
+.rotate-static-3d {
+  /* This creates the non-animated 3D angle */
+  transform: rotateX(8deg) rotateY(-5deg);
+  transition: none !important;
+}
+
+.image-3d-tilt {
+  /* Rotate on X and Y axes to make it look angled */
+  transform: rotateX(10deg) rotateY(-8deg); 
+  /* Ensure no animation or transition */
+  transition: none !important;
+}
