@@ -4,6 +4,7 @@ import {
   deleteCartItem,
   fectProducts,
   fectProductsById,
+  fetchSearchProducts,
   getCartItem,
 } from "./fetcproducts.ts";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -22,6 +23,14 @@ export const useGetProduct = (id: any) => {
   });
 };
 
+
+export const useSearchProducts = (search_item: string) => {
+  return useQuery({
+    queryKey: ["searchProducts", search_item],
+    queryFn: () => fetchSearchProducts(search_item),
+    enabled: !!search_item, // only run when user types something
+  });
+};
 export const useAdditem = () => {
   const queryClient = useQueryClient();
   return useMutation({

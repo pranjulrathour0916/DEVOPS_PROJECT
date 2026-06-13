@@ -20,6 +20,7 @@ const Cart = React.lazy(() => import('../src/components/layouts/resuable/Cart'))
 function App() {
   const hideNavbarRoutes = ['/login', '/signUp']
   const location = useLocation()
+    const [search, setSearch] = useState("");
   const [categoryId, setCategoryId] = useState(null)
 
   const hideNavbar = hideNavbarRoutes.includes(location.pathname)
@@ -27,12 +28,12 @@ function App() {
     <div className='bg-[#F8FAFC] min-h-screen font-semibold tracking-wider' >
       {/* <Snowfall/> */}
    <div>
-    {!hideNavbar && <Navbar/>}
+    {!hideNavbar && <Navbar setSearch={setSearch}/>}
     <div className=''>
    {!hideNavbar && <Categories setCategoryId={setCategoryId}/>}
 
     <Routes>
-      <Route path='/' element={<Home categoryId={categoryId}/>}/>
+      <Route path='/' element={<Home categoryId={categoryId} search = {search}/>}/>
       <Route path='/login' element={<Login/>}/>
       <Route path='/signUp' element={<SignUp/>}/>
       <Route path='/prodetail' element={<Proddetail/>}/>

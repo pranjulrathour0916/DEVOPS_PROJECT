@@ -31,11 +31,12 @@ import Loader from "./resuable/Loader.jsx";
 //   fetchCity();
 
 // }, []);
-const Navbar = () => {
+const Navbar = ({setSearch}) => {
   const navigate = useNavigate();
   // const cart = useSelector((state)=> state.cart)
 
-  
+
+ 
   const { data: user, isLoading } = useMeLogin();
   const { mutate: logoutUser } = useLogout();
   const { data: cart } = useQuery({
@@ -61,6 +62,9 @@ const handleLogout = () => {
   const openCart = () => {
     navigate("/cart");
   };
+  const handleClick = () => {
+    navigate('/')
+  }
 
   return (
     <nav className="bg-[#000000] z-50 top-0 left-0 sticky w-full text-white">
@@ -68,6 +72,7 @@ const handleLogout = () => {
         <img
           src={logo}
           alt=""
+          onClick={handleClick}
           className="w-auto  object-contain h-20 rounded-full "
         />
         <div className="flex flex-row items-center hover:outline hover:outline-2 p-3">
@@ -82,6 +87,7 @@ const handleLogout = () => {
             type="text"
             name=""
             id=""
+            onChange={(e)=>setSearch(e.target.value)}
             className="w-full relative placeholder:text-center  text-black  rounded-lg p-1"
             placeholder="Mobile"
           />

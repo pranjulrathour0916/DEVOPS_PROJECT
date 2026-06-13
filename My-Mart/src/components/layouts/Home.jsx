@@ -8,7 +8,7 @@ import Slider from "./Slider";
 import SingleProd from "./SingleProd";
 import Footer from "./Footer";
 
-const Home = ({categoryId}) => {
+const Home = ({categoryId, search}) => {
   const [index, setIndex] = useState(0);
  
  
@@ -53,7 +53,7 @@ const Home = ({categoryId}) => {
         </AnimatePresence>
       </div>
       <div className="products mt-10 ">
-        <Products categoryId={categoryId} />
+        <Products categoryId={categoryId} search = {search} />
       </div>
       <div>
         <Slider categoryId={categoryId} />

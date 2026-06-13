@@ -1,5 +1,5 @@
 import axios from "axios";
-
+const URL = "/api/prod"
 export interface cartItem {
   prodId: Number;
   quantity: Number;
@@ -8,7 +8,7 @@ export interface cartItem {
 export const fectProducts = async (category?: number) => {
   console.log("query", category);
   const productsList = await axios.get(
-    "http://localhost:5001/prod/getallProd/",
+    `${URL}/getallProd/`,
     {
       params: category ? { category } : {},
     },
@@ -16,10 +16,20 @@ export const fectProducts = async (category?: number) => {
   return productsList.data;
 };
 
+export const fetchSearchProducts = async (search_item?: string) => {
+  const res = await axios.get(
+    `${URL}/search`,
+    {
+      params: search_item ? { search_item } : {},
+    }
+  );
+  return res.data;
+};
+
 export const fectProductsById = async (id: any) => {
   console.log("params", id);
   const productsList = await axios.get(
-    `http://localhost:5001/prod/getProdById/${id}`,
+    `${URL}/getProdById/${id}`,
   );
   console.log("works");
   return productsList.data;
@@ -27,7 +37,7 @@ export const fectProductsById = async (id: any) => {
 
 export const addtocart = async (item: cartItem) => {
   console.log("item. ", item);
-  const addItem = await axios.post("http://localhost:5001/prod/cart", item, {
+  const addItem = await axios.post(`${URL}/cart`, item, {
     withCredentials: true,
   });
   console.log("added item", addItem);
@@ -35,7 +45,7 @@ export const addtocart = async (item: cartItem) => {
 };
 
 export const getCartItem = async () => {
-  const carItem = await axios.get("http://localhost:5001/prod/cartItem", {
+  const carItem = await axios.get(`${URL}/cartItem`, {
     withCredentials: true,
   });
   console.log("cartItem are ", carItem.data[0]);
@@ -44,7 +54,7 @@ export const getCartItem = async () => {
 
 export const deleteCartItem = async (prod_id: any) => {
   const deletItem = await axios.delete(
-    "http://localhost:5001/prod/deletecartitem",
+    `${URL}/deletecartitem`,
     {
       data: {
         prod_id 
