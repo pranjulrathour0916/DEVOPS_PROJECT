@@ -1,5 +1,5 @@
 import axios from "axios";
-const URL = "/api/prod"
+const URL = "/prod"
 export interface cartItem {
   prodId: Number;
   quantity: Number;
