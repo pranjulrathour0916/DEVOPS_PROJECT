@@ -51,7 +51,7 @@ spec:
               valueFrom:
                 secretKeyRef:
                   name: {{.Values.DB_URL_NAME}}
-                  key: {{.Values.DB_URL}}
+                  key: {{.Values.DATABASE_URL}}
                   optional: false
           {{- with .Values.livenessProbe }}
           livenessProbe:

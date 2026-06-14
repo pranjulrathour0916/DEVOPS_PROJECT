@@ -142,17 +142,20 @@ autoscaling:
   # targetMemoryUtilizationPercentage: 80
 
 # Additional volumes on the output Deployment definition.
-volumes: []
-  # - name: foo
-  #   secret:
-  #     secretName: mysecret
-  #     optional: false
+volumes:
+   - name: nginx-config
+     configMap:
+       name: frontend-nginx-conf
+#     secret:
+#       secretName: mysecret
+#       optional: false
 
 # Additional volumeMounts on the output Deployment definition.
-volumeMounts: []
-  # - name: foo
-  #   mountPath: "/etc/foo"
-  #   readOnly: true
+volumeMounts:
+   - name: nginx-config
+     mountPath: /etc/nginx/conf.d/default.conf
+     subPath: default.conf
+     readOnly: true
 
 nodeSelector: {}
 
