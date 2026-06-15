@@ -34,11 +34,18 @@ jobs:
      uses: helm/kind-action@v1.10.0
 
    - name: Deploying Frontend on K8s
-     run: helm install frontend ./frontend --namespace app --create-namespace
+     run: helm upgrade --install frontend ./frontend --namespace app --create-namespace
      working-directory: ./k8s
 
    - name: Deploying Backend on K8s
-     run: helm install backend ./backend -n app
+     run: helm upgrade --install backend ./backend -n app
+     working-directory: ./k8s
+    
+   - name: Veryfing Frontend container
+     run: kubectl rollout status deployement/frontend -n app
+
+   - name: Veryfing backend container
+     run: kubectl rollout status deployement/backend -n app
 
  success-message: 
     needs: [build]
