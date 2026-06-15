@@ -39,7 +39,6 @@ jobs:
 
    - name: Deploying Backend on K8s
      run: helm install backend ./backend -n app
-     working-directory: ./k8s
 
  success-message: 
     needs: [build]
