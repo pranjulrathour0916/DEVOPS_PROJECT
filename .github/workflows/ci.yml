@@ -38,7 +38,7 @@ jobs:
      working-directory: ./k8s
 
    - name: Deploying Backend on K8s
-     run: helm install frontned ./backend -n app
+     run: helm install backend ./backend -n app
      working-directory: ./k8s
 
  success-message: 
