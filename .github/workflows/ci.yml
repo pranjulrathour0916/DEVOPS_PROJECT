@@ -30,6 +30,39 @@ jobs:
            docker push ${{ secrets.DOCKER_USERNAME }}/frontend
            docker push ${{ secrets.DOCKER_USERNAME }}/backend
 
+   - name: AWS login
+     run: |
+          aws configure set aws_access_key_id ${{ secrets.AWS_ACCESS_KEY }}
+          aws configure set aws_secret_access_key ${{ secrets.AWS_SECERET_KEY }}
+
+   - name: ECR login
+     uses: aws-actions/amazon-ecr-login@v2
+     id: login-ecr
+
+   - name: Terraform initialization
+     run: terraform init
+     working-directory: ./terraform
+
+   - name: Terraform apply
+     run: terraform apply
+     working-directory: ./terraform
+
+   - name: Get Frontend and Backend ECR URL 
+     id: terraform
+     run: |
+        echo "ECR_URL_FRONTEND=$(terraform output -raw frontend_ecr_repo)" >> $GITHUB_ENV
+        echo "ECR_URL_BACKEND=$(terraform output -raw backend_ecr_repo)" >> $GITHUB_ENV
+
+   - name: Taggin images
+     run: |
+        docker tag ${{ secrets.DOCKER_USERNAME }}/frontend:latest $ECR_URL_FRONTEND:latest
+        docker tag ${{ secrets.DOCKER_USERNAME }}/backend:latest $ECR_URL_BACKEND:latest
+
+   - name: Pushing images to ECR
+     run: |
+        docker push $ECR_URL_FRONTEND:latest
+        docker push $ECR_URL_BACKEND:latest
+
    - name: Create k8s Kind Cluster
      uses: helm/kind-action@v1.10.0
 
