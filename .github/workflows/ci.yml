@@ -58,6 +58,7 @@ jobs:
 
    - name: Get Frontend and Backend ECR URL 
      id: terraform
+     working-directory: ./terraform
      run: |
         echo "ECR_URL_FRONTEND=$(terraform output -raw frontend_ecr_repo)" >> $GITHUB_ENV
         echo "ECR_URL_BACKEND=$(terraform output -raw backend_ecr_repo)" >> $GITHUB_ENV
