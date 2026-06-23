@@ -43,6 +43,11 @@ jobs:
         region: ap-south-1
      id: login-ecr
 
+   - name: Setup Terraform
+     uses: hashicorp/setup-terraform@v3
+     with:
+        terraform_version: "1.14.9" 
+
    - name: Terraform initialization
      run: terraform init
      working-directory: ./terraform
