@@ -53,7 +53,7 @@ jobs:
      working-directory: ./terraform
 
    - name: Terraform apply
-     run: terraform apply
+     run: terraform apply -auto-approve
      working-directory: ./terraform
 
    - name: Get Frontend and Backend ECR URL 
