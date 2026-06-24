@@ -1,7 +1,7 @@
 resource "aws_s3_bucket" "state" {
-  bucket = "terra-bucket-state"
+  bucket = "terra-backend-pr"
   tags = {
-    name = "test_bucket_state"
+    name = "terra-backend-pr"
     env = "dev"
   }
 }
