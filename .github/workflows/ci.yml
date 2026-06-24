@@ -77,10 +77,6 @@ jobs:
         docker push $ECR_URL_FRONTEND:latest
         docker push $ECR_URL_BACKEND:latest
 
-   - name: Terraform destroy
-     run: terraform destroy -auto-approve
-     working-directory: ./terraform
-
    - name: Create k8s Kind Cluster
      uses: helm/kind-action@v1.10.0
 
