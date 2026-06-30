@@ -1,0 +1,25 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: argocd-notifications-cm
+  namespace: argocd
+data:
+  context: |
+      argocdUrl: "https://localhost:8080"
+  service.email.gmail: |
+    host: smtp.gmail.com
+    port: 465
+    from: pranjalrathore9838@gmail.com
+    username: $email-username
+    password: $email-password
+    
+  # Define a template for sync status
+  template.email-sync-status: |
+    email:
+      subject: "ArgoCD: {{ .app.metadata.name }} - {{ .app.status.sync.status }}"
+    message: |
+      {{ if eq .app.status.sync.status "Synced" }}✅{{ else }}❌{{ end }}
+      Application **{{ .app.metadata.name }}** is now **{{ .app.status.sync.status }}**.
+      Project: {{ .app.spec.project }}
+      Revision: {{ .app.status.sync.revision }}
+      Link: {{ .context.argocdUrl }}/applications/{{ .app.metadata.name }}
