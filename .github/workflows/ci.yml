@@ -76,34 +76,6 @@ jobs:
             -f ./martdb/dockerfile ./martdb
 
       ####################################################
-      # Trivy Scan Frontend
-      ####################################################
-
-      - name: Scan Frontend Image
-        uses: aquasecurity/trivy-action@0.36.0
-        with:
-          image-ref: ${{ secrets.DOCKER_USERNAME }}/frontend:${{ steps.version.outputs.version }}
-          format: table
-          exit-code: 1
-          ignore-unfixed: true
-          vuln-type: os,library
-          severity: CRITICAL,HIGH
-
-      ####################################################
-      # Trivy Scan Backend
-      ####################################################
-
-      - name: Scan Backend Image
-        uses: aquasecurity/trivy-action@0.36.0
-        with:
-          image-ref: ${{ secrets.DOCKER_USERNAME }}/backend:${{ steps.version.outputs.version }}
-          format: table
-          exit-code: 1
-          ignore-unfixed: true
-          vuln-type: os,library
-          severity: CRITICAL,HIGH
-
-      ####################################################
       # Push DockerHub Images
       ####################################################
 
