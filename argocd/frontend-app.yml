@@ -1,0 +1,31 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: frontend
+  namespace: argocd 
+  annotations:
+    notifications.argoproj.io/subscribe.on-sync-succeeded.gmail: pranjulrathour3824@gmail.com
+    notifications.argoproj.io/subscribe.on-sync-failed.gmail: pranjulrathour3824@gmail.com
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/pranjulrathour0916/DEVOPS_PROJECT.git
+    targetRevision: dev 
+    path: k8s/frontend     
+
+    helm:
+      valueFiles:
+        - values.yaml
+    
+
+  destination:
+    server: https://kubernetes.default.svc 
+    namespace: argocd
+    
+ 
+  syncPolicy:
+    automated: 
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true 

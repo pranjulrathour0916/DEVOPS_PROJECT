@@ -1,0 +1,25 @@
+apiVersion: argocd-image-updater.argoproj.io/v1alpha1
+kind: ImageUpdater
+metadata:
+  name: backend-image-updater
+  namespace: argocd
+spec:
+  writeBackConfig:
+    method: "git:secret:argocd/git-creds"
+    gitConfig:
+      repository: "https://github.com/pranjulrathour0916/DEVOPS_PROJECT.git"
+      branch: "dev"
+  applicationRefs:
+    - namePattern: "backend"
+      images:
+        - alias: "backend"
+          imageName: "pranulrathour/backend"
+          manifestTargets:
+            helm:
+              name: image.repository
+              tag: image.tag
+      writeBackConfig:
+        method: "git:secret:argocd/git-creds"
+        gitConfig:
+          branch: "dev"
+          writeBackTarget: "helmvalues:values.yaml"
