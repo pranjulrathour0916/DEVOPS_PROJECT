@@ -80,7 +80,7 @@ jobs:
       ####################################################
 
       - name: Scan Frontend Image
-        uses: aquasecurity/trivy-action@0.28.0
+        uses: aquasecurity/trivy-action@0.36.0
         with:
           image-ref: ${{ secrets.DOCKER_USERNAME }}/frontend:${{ steps.version.outputs.version }}
           format: table
@@ -94,7 +94,7 @@ jobs:
       ####################################################
 
       - name: Scan Backend Image
-        uses: aquasecurity/trivy-action@0.28.0
+        uses: aquasecurity/trivy-action@0.36.0
         with:
           image-ref: ${{ secrets.DOCKER_USERNAME }}/backend:${{ steps.version.outputs.version }}
           format: table
