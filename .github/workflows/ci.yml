@@ -1,103 +1,252 @@
 name: Deploy My Mart
 
 on:
- push:
-  branches: ["main"]
+  push:
+    branches:
+      - dev
+    tags:
+      - "v*.*.*"
 
 permissions:
- pages: write
- id-token: write
+  contents: read
+  id-token: write
+  pages: write
 
 jobs:
- build:
-  runs-on: ubuntu-latest
-
-  steps:
-   - name: Checkout Code
-     uses: actions/checkout@v4
-     
-   - name: docker login
-     run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
-    
-   - name: Build My_Mart Docker Images
-     run: docker build -t ${{ secrets.DOCKER_USERNAME }}/frontend -f ./My-Mart/dockerfile ./My-Mart
-
-   - name: Build My_Mart_DB Docker Image
-     run: docker build -t ${{ secrets.DOCKER_USERNAME }}/backend -f ./martdb/dockerfile ./martdb
-  
-   - name: Pushing Image to docker hub
-     run: |
-           docker push ${{ secrets.DOCKER_USERNAME }}/frontend
-           docker push ${{ secrets.DOCKER_USERNAME }}/backend
-
-   - name: Configure AWS credentials
-     uses: aws-actions/configure-aws-credentials@v4
-     with:
-        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY }}
-        aws-secret-access-key: ${{ secrets.AWS_SECERET_KEY }}
-        aws-region: ap-south-1
-
-   - name: ECR login
-     uses: aws-actions/amazon-ecr-login@v2
-     with: 
-        region: ap-south-1
-     id: login-ecr
-
-   - name: Setup Terraform
-     uses: hashicorp/setup-terraform@v3
-     with:
-        terraform_version: "1.14.9" 
-
-   - name: Terraform initialization
-     run: terraform init -input=false
-     working-directory: ./terraform
-
-   - name: Terraform Plan
-     run: terraform plan -out=tfplan -input=false
-     working-directory: ./terraform
-
-   - name: Terraform apply
-     run: terraform apply -auto-approve
-     working-directory: ./terraform
-
-   - name: Get Frontend and Backend ECR URL 
-     id: terraform
-     working-directory: ./terraform
-     run: |
-        echo "ECR_URL_FRONTEND=$(terraform output -raw frontend_ecr_repo)" >> $GITHUB_ENV
-        echo "ECR_URL_BACKEND=$(terraform output -raw backend_ecr_repo)" >> $GITHUB_ENV
-
-   - name: Taggin images
-     run: |
-        docker tag ${{ secrets.DOCKER_USERNAME }}/frontend:latest $ECR_URL_FRONTEND:latest
-        docker tag ${{ secrets.DOCKER_USERNAME }}/backend:latest $ECR_URL_BACKEND:latest
-
-   - name: Pushing images to ECR
-     run: |
-        docker push $ECR_URL_FRONTEND:latest
-        docker push $ECR_URL_BACKEND:latest
-
-   - name: Create k8s Kind Cluster
-     uses: helm/kind-action@v1.10.0
-
-   - name: Deploying Frontend on K8s
-     run: helm upgrade --install frontend ./frontend --namespace app --create-namespace
-     working-directory: ./k8s
-
-   - name: Deploying Backend on K8s
-     run: helm upgrade --install backend ./backend -n app
-     working-directory: ./k8s
-    
-   - name: Veryfing Frontend container
-     run: kubectl rollout status deployment/frontend -n app
-
-   - name: Veryfing backend container
-     run: kubectl rollout status deployment/backend -n app
-
- success-message: 
-    needs: [build]
+  build:
     runs-on: ubuntu-latest
-    if: success()
+
     steps:
-    - run: echo "All jobs passed"
-    
+      ####################################################
+      # Checkout
+      ####################################################
+
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      ####################################################
+      # Get Semantic Version
+      ####################################################
+
+      - name: Get Semantic Version
+        id: version
+        shell: bash
+        run: |
+          if [[ "${GITHUB_REF}" == refs/tags/* ]]; then
+            VERSION="${GITHUB_REF#refs/tags/}"
+          else
+            VERSION=$(git describe --tags --abbrev=0 2>/dev/null || echo "v0.0.1")
+          fi
+
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          echo "VERSION=$VERSION" >> "$GITHUB_ENV"
+
+      ####################################################
+      # Docker Login
+      ####################################################
+
+      - name: Login to Docker Hub
+        run: |
+          echo "${{ secrets.DOCKER_PASSWORD }}" | docker login \
+            -u "${{ secrets.DOCKER_USERNAME }}" \
+            --password-stdin
+
+      ####################################################
+      # Build Frontend
+      ####################################################
+
+      - name: Build Frontend Image
+        run: |
+          docker build \
+            -t ${{ secrets.DOCKER_USERNAME }}/frontend:${{ steps.version.outputs.version }} \
+            -t ${{ secrets.DOCKER_USERNAME }}/frontend:latest \
+            -f ./My-Mart/dockerfile ./My-Mart
+
+      ####################################################
+      # Build Backend
+      ####################################################
+
+      - name: Build Backend Image
+        run: |
+          docker build \
+            -t ${{ secrets.DOCKER_USERNAME }}/backend:${{ steps.version.outputs.version }} \
+            -t ${{ secrets.DOCKER_USERNAME }}/backend:latest \
+            -f ./martdb/dockerfile ./martdb
+
+      ####################################################
+      # Trivy Scan Frontend
+      ####################################################
+
+      - name: Scan Frontend Image
+        uses: aquasecurity/trivy-action@0.28.0
+        with:
+          image-ref: ${{ secrets.DOCKER_USERNAME }}/frontend:${{ steps.version.outputs.version }}
+          format: table
+          exit-code: 1
+          ignore-unfixed: true
+          vuln-type: os,library
+          severity: CRITICAL,HIGH
+
+      ####################################################
+      # Trivy Scan Backend
+      ####################################################
+
+      - name: Scan Backend Image
+        uses: aquasecurity/trivy-action@0.28.0
+        with:
+          image-ref: ${{ secrets.DOCKER_USERNAME }}/backend:${{ steps.version.outputs.version }}
+          format: table
+          exit-code: 1
+          ignore-unfixed: true
+          vuln-type: os,library
+          severity: CRITICAL,HIGH
+
+      ####################################################
+      # Push DockerHub Images
+      ####################################################
+
+      - name: Push Images to DockerHub
+        run: |
+          docker push ${{ secrets.DOCKER_USERNAME }}/frontend:${{ steps.version.outputs.version }}
+          docker push ${{ secrets.DOCKER_USERNAME }}/frontend:latest
+
+          docker push ${{ secrets.DOCKER_USERNAME }}/backend:${{ steps.version.outputs.version }}
+          docker push ${{ secrets.DOCKER_USERNAME }}/backend:latest
+
+      ####################################################
+      # Configure AWS Credentials
+      ####################################################
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY }}
+          aws-secret-access-key: ${{ secrets.AWS_SECERET_KEY }}
+          aws-region: ap-south-1
+
+      ####################################################
+      # Login to ECR
+      ####################################################
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      ####################################################
+      # Terraform
+      ####################################################
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "1.14.0"
+
+      - name: Terraform Init
+        working-directory: ./terraform
+        run: terraform init -input=false
+
+      - name: Terraform Plan
+        working-directory: ./terraform
+        run: terraform plan -out=tfplan -input=false
+
+      - name: Terraform Apply
+        working-directory: ./terraform
+        run: terraform apply -auto-approve
+
+      ####################################################
+      # Get ECR URLs
+      ####################################################
+
+      - name: Get ECR Repository URLs
+        working-directory: ./terraform
+        run: |
+          echo "ECR_URL_FRONTEND=$(terraform output -raw frontend_ecr_repo)" >> "$GITHUB_ENV"
+          echo "ECR_URL_BACKEND=$(terraform output -raw backend_ecr_repo)" >> "$GITHUB_ENV"
+
+      ####################################################
+      # Tag Images
+      ####################################################
+
+      - name: Tag Images for ECR
+        run: |
+          docker tag \
+            ${{ secrets.DOCKER_USERNAME }}/frontend:${{ steps.version.outputs.version }} \
+            $ECR_URL_FRONTEND:${{ steps.version.outputs.version }}
+
+          docker tag \
+            ${{ secrets.DOCKER_USERNAME }}/frontend:${{ steps.version.outputs.version }} \
+            $ECR_URL_FRONTEND:latest
+
+          docker tag \
+            ${{ secrets.DOCKER_USERNAME }}/backend:${{ steps.version.outputs.version }} \
+            $ECR_URL_BACKEND:${{ steps.version.outputs.version }}
+
+          docker tag \
+            ${{ secrets.DOCKER_USERNAME }}/backend:${{ steps.version.outputs.version }} \
+            $ECR_URL_BACKEND:latest
+
+      ####################################################
+      # Push to ECR
+      ####################################################
+
+      - name: Push Images to Amazon ECR
+        run: |
+          docker push $ECR_URL_FRONTEND:${{ steps.version.outputs.version }}
+          docker push $ECR_URL_FRONTEND:latest
+
+          docker push $ECR_URL_BACKEND:${{ steps.version.outputs.version }}
+          docker push $ECR_URL_BACKEND:latest
+
+      ####################################################
+      # Create Kind Cluster
+      ####################################################
+
+      - name: Create Kind Cluster
+        uses: helm/kind-action@v1.10.0
+
+      ####################################################
+      # Deploy Frontend
+      ####################################################
+
+      - name: Deploy Frontend
+        working-directory: ./k8s
+        run: |
+          helm upgrade --install frontend ./frontend \
+            --namespace app \
+            --create-namespace \
+            --set image.tag=${{ steps.version.outputs.version }}
+
+      ####################################################
+      # Deploy Backend
+      ####################################################
+
+      - name: Deploy Backend
+        working-directory: ./k8s
+        run: |
+          helm upgrade --install backend ./backend \
+            --namespace app \
+            --set image.tag=${{ steps.version.outputs.version }}
+
+      ####################################################
+      # Verify
+      ####################################################
+
+      - name: Verify Frontend
+        run: kubectl rollout status deployment/frontend -n app
+
+      - name: Verify Backend
+        run: kubectl rollout status deployment/backend -n app
+
+  success-message:
+    needs: build
+    if: success()
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Success
+        run: |
+          echo "======================================="
+          echo "Deployment Successful"
+          echo "======================================="
