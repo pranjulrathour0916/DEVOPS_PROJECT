@@ -34,14 +34,20 @@ jobs:
         id: version
         shell: bash
         run: |
-          if [[ "${GITHUB_REF}" == refs/tags/* ]]; then
-            VERSION="${GITHUB_REF#refs/tags/}"
+          git fetch --tags
+
+          LAST_TAG=$(git tag --list "v*.*.*" --sort=-v:refname | head -n1)
+
+          if [ -z "$LAST_TAG" ]; then
+            VERSION="v1.0.0"
           else
-            VERSION=$(git describe --tags --abbrev=0 2>/dev/null || echo "v0.0.1")
+            VERSION=$(echo "$LAST_TAG" | awk -F. -v OFS=. '{$NF++; print}')
           fi
 
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
           echo "VERSION=$VERSION" >> "$GITHUB_ENV"
+
+          echo "Next Version: $VERSION"
 
       ####################################################
       # Docker Login
@@ -110,22 +116,22 @@ jobs:
       # Terraform
       ####################################################
 
-      - name: Setup Terraform
-        uses: hashicorp/setup-terraform@v3
-        with:
-          terraform_version: "1.14.0"
+      # - name: Setup Terraform
+      #   uses: hashicorp/setup-terraform@v3
+      #   with:
+      #     terraform_version: "1.14.0"
 
-      - name: Terraform Init
-        working-directory: ./terraform
-        run: terraform init -input=false
+      # - name: Terraform Init
+      #   working-directory: ./terraform
+      #   run: terraform init -input=false
 
-      - name: Terraform Plan
-        working-directory: ./terraform
-        run: terraform plan -out=tfplan -input=false
+      # - name: Terraform Plan
+      #   working-directory: ./terraform
+      #   run: terraform plan -out=tfplan -input=false
 
-      - name: Terraform Apply
-        working-directory: ./terraform
-        run: terraform apply -auto-approve
+      # - name: Terraform Apply
+      #   working-directory: ./terraform
+      #   run: terraform apply -auto-approve
 
       ####################################################
       # Get ECR URLs
