@@ -369,6 +369,19 @@ Application Updated
 
 # 📸 Screenshots
 
+| Screenshot | File |
+|------------|------|
+| GitHub Actions | docs/github-actions.png |
+| DockerHub | docs/dockerhub.png |
+| Terraform Apply | docs/terraform.png |
+| Amazon ECR | docs/ecr.png |
+| ArgoCD Dashboard | docs/argocd.png |
+| Image Updater | docs/image-updater.png |
+| Notifications | docs/notifications.png |
+| Kubernetes Pods | docs/pods.png |
+| Helm Releases | docs/helm.png |
+| Running Application | docs/application.png |
+
 # ▶ Running Locally
 
 Clone the repository
