@@ -369,18 +369,75 @@ Application Updated
 
 # 📸 Screenshots
 
-| Screenshot | File |
-|------------|------|
-| GitHub Actions | docs/github-actions.png |
-| DockerHub | docs/dockerhub.png |
-| Terraform Apply | docs/terraform.png |
-| Amazon ECR | docs/ecr.png |
-| ArgoCD Dashboard | docs/argocd.png |
-| Image Updater | docs/image-updater.png |
-| Notifications | docs/notifications.png |
-| Kubernetes Pods | docs/pods.png |
-| Helm Releases | docs/helm.png |
-| Running Application | docs/application.png |
+## GitHub Actions
+
+<p align="center">
+  <img src="docs/github-actions.png" width="900">
+</p>
+
+---
+
+## DockerHub
+
+<p align="center">
+  <img src="docs/dockerhub.png" width="900">
+</p>
+
+---
+
+## Terraform Apply
+
+<p align="center">
+  <img src="docs/terraform.png" width="900">
+</p>
+
+---
+
+## Amazon ECR
+
+<p align="center">
+  <img src="docs/ecr.png" width="900">
+</p>
+
+---
+
+## ArgoCD Dashboard
+
+<p align="center">
+  <img src="docs/argocd.png" width="900">
+</p>
+
+---
+
+## Image Updater
+
+<p align="center">
+  <img src="docs/image-updater.png" width="900">
+</p>
+
+---
+
+## Notifications
+
+<p align="center">
+  <img src="docs/notifications.png" width="900">
+</p>
+
+---
+
+## Kubernetes Pods
+
+<p align="center">
+  <img src="docs/pods.png" width="900">
+</p>
+
+---
+
+## Running Application
+
+<p align="center">
+  <img src="docs/application.png" width="900">
+</p>
 
 # ▶ Running Locally
 
