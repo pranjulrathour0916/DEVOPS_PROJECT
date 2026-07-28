@@ -141,7 +141,7 @@ jobs:
 
       - name: Health Check
         run: |
-          kubectl port-forward svc/frontend 8080:80 &
+          kubectl port-forward svc/frontend 8080:80 -n testing &
           sleep 10
           curl --fail http://localhost:8080/prod/getallProd/
 
