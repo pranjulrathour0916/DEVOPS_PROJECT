@@ -87,6 +87,8 @@ jobs:
 
       - name: Create Kind Cluster
         uses: helm/kind-action@v1.10.0
+        with:
+          cluster_name: kind
 
      ####################################################
       # Loading Local Image
