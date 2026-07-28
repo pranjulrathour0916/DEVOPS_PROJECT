@@ -439,6 +439,12 @@ Application Updated
   <img src="docs/application.png" width="900">
 </p>
 
+## Monitorinig Grafana
+
+<p align="center">
+  <img src="docs/grafana.png" width="900">
+</p>
+
 # ▶ Running Locally
 
 Clone the repository
