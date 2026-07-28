@@ -88,6 +88,18 @@ jobs:
       - name: Create Kind Cluster
         uses: helm/kind-action@v1.10.0
 
+     ####################################################
+      # Loading Local Image
+      ####################################################
+
+      - name: Load Frontend Image
+        run: |
+          kind load docker-image ${{ secrets.DOCKER_USERNAME }}/frontend:test
+
+      - name: Load Backend Image
+        run: |
+          kind load docker-image ${{ secrets.DOCKER_USERNAME }}/backend:test
+
       ####################################################
       # Testing Image - Deploy Frontend 
       ####################################################
@@ -129,7 +141,7 @@ jobs:
         run: |
           kubectl port-forward svc/frontend 8080:80 &
           sleep 10
-          curl --fail http://localhost:3000/prod/getallProd/
+          curl --fail http://localhost:8080/prod/getallProd/
 
       ####################################################
       # Push DockerHub Images
